@@ -1,21 +1,24 @@
 package stones
 
 import (
-	"fmt"
+	"errors"
 	"testing"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 func TestNewBundle(t *testing.T) {
 	b, _ := NewBundle()
-	empty := StixID{}
+	empty := uuid.UUID{}
 
-	if b.ID == empty {
-		t.Error("Got:", b.ID, "Expected: NOT", empty)
+	if b.ID == empty.String() {
+		t.Error("Got:", b.ID, "Expected: NOT", empty.String())
 	}
 }
 
 func TestBundleValidate(t *testing.T) {
-	id, _ := NewStixID()
+	id, _ := newStixID("bundle")
+	ids := id.String()
 	objects := []string{"object 1", "object 2"}
 
 	tests := []struct {
@@ -23,19 +26,19 @@ func TestBundleValidate(t *testing.T) {
 		valid  bool
 		errs   []error
 	}{
-		{bundle: Bundle{Type: "fail", ID: id, SpecVersion: specVersion, Objects: objects},
+		{bundle: Bundle{Type: "fail", ID: ids, SpecVersion: specVersion, Objects: objects},
 			valid: false,
-			errs:  []error{invalidType("invalid type")}},
-		{bundle: Bundle{Type: "bundle", ID: id, SpecVersion: "1.0", Objects: objects},
+			errs:  []error{errors.New("wrong type")}},
+		{bundle: Bundle{Type: "bundle", ID: ids, SpecVersion: "1.0", Objects: objects},
 			valid: false,
-			errs:  []error{invalidType("invalid spec version")}},
+			errs:  []error{errors.New("wrong spec version")}},
 		{bundle: Bundle{Type: "bundle", SpecVersion: specVersion, Objects: objects},
 			valid: false,
-			errs:  []error{invalidType("invalid id")}},
-		{bundle: Bundle{Type: "bundle", ID: id, SpecVersion: specVersion, Objects: []string{}},
+			errs:  []error{errors.New("no id")}},
+		{bundle: Bundle{Type: "bundle", ID: ids, SpecVersion: specVersion, Objects: []string{}},
 			valid: false,
-			errs:  []error{fmt.Errorf("no objects")}},
-		{bundle: Bundle{Type: "bundle", ID: id, SpecVersion: specVersion, Objects: objects},
+			errs:  []error{errors.New("no objects")}},
+		{bundle: Bundle{Type: "bundle", ID: ids, SpecVersion: specVersion, Objects: objects},
 			valid: true,
 			errs:  []error{}},
 	}

@@ -2,12 +2,10 @@ package stones
 
 import "fmt"
 
-const bundleType = "bundle"
-
 // Bundle is a STIX bundle: a collection of STIX objects
 type Bundle struct {
 	Type        string   `json:"type"`
-	ID          StixID   `json:"id"`
+	ID          string   `json:"id"`
 	SpecVersion string   `json:"spec_version"`
 	Objects     []string `json:"objects"`
 }
@@ -15,9 +13,9 @@ type Bundle struct {
 // NewBundle returns a STIX bundle object
 func NewBundle() (Bundle, error) {
 	b := Bundle{}
-	id, err := NewStixID()
+	id, err := newStixID(bundleType)
 
-	b.ID = id
+	b.ID = id.String()
 	b.Type = bundleType
 	b.SpecVersion = specVersion
 
@@ -29,11 +27,12 @@ func (b *Bundle) Validate() (bool, []error) {
 	var errs []error
 
 	if b.Type != bundleType {
-		errs = append(errs, invalidType(b.Type))
+		errs = append(errs, invalidType())
 	}
 
-	if b.ID.isEmpty() {
-		errs = append(errs, invalidID())
+	valid, err := validStixID(b.ID)
+	if !valid {
+		errs = append(errs, invalidID(err))
 	}
 
 	if b.SpecVersion != specVersion {
