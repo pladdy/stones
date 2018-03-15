@@ -1,13 +1,16 @@
 package stones
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // Bundle is a STIX bundle: a collection of STIX objects
 type Bundle struct {
-	Type        string   `json:"type"`
-	ID          string   `json:"id"`
-	SpecVersion string   `json:"spec_version"`
-	Objects     []string `json:"objects"`
+	Type        string            `json:"type"`
+	ID          string            `json:"id"`
+	SpecVersion string            `json:"spec_version"`
+	Objects     []json.RawMessage `json:"objects"`
 }
 
 // NewBundle returns a STIX bundle object
@@ -20,6 +23,15 @@ func NewBundle() (Bundle, error) {
 	b.SpecVersion = specVersion
 
 	return b, err
+}
+
+// AddObject adds a object to the bundle
+func (b *Bundle) AddObject(o string) {
+	bundle := *b
+
+	bundle.Objects = append(bundle.Objects, json.RawMessage(o))
+
+	*b = bundle
 }
 
 // Validate is called to validate a bundle

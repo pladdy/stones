@@ -1,7 +1,9 @@
 package stones
 
 import (
+	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"testing"
 
 	uuid "github.com/satori/go.uuid"
@@ -12,14 +14,19 @@ func TestNewBundle(t *testing.T) {
 	empty := uuid.UUID{}
 
 	if b.ID == empty.String() {
-		t.Error("Got:", b.ID, "Expected: NOT", empty.String())
+		t.Error("Got:", b.ID, "Expected: Not an empty UUID", empty.String())
 	}
 }
 
 func TestBundleValidate(t *testing.T) {
 	id, _ := newStixID("bundle")
 	ids := id.String()
-	objects := []string{"object 1", "object 2"}
+
+	b, err := ioutil.ReadFile("testdata/malware_bundle.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	objects := []json.RawMessage{b}
 
 	tests := []struct {
 		bundle Bundle
@@ -35,7 +42,7 @@ func TestBundleValidate(t *testing.T) {
 		{bundle: Bundle{Type: "bundle", SpecVersion: specVersion, Objects: objects},
 			valid: false,
 			errs:  []error{errors.New("no id")}},
-		{bundle: Bundle{Type: "bundle", ID: ids, SpecVersion: specVersion, Objects: []string{}},
+		{bundle: Bundle{Type: "bundle", ID: ids, SpecVersion: specVersion, Objects: []json.RawMessage{}},
 			valid: false,
 			errs:  []error{errors.New("no objects")}},
 		{bundle: Bundle{Type: "bundle", ID: ids, SpecVersion: specVersion, Objects: objects},
