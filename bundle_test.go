@@ -19,7 +19,7 @@ func TestNewBundle(t *testing.T) {
 }
 
 func TestBundleValidate(t *testing.T) {
-	id, _ := newStixID("bundle")
+	id, _ := NewStixID("bundle")
 	ids := id.String()
 
 	b, err := ioutil.ReadFile("testdata/malware_bundle.json")

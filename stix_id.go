@@ -9,19 +9,20 @@ import (
 
 const stixIDJoin = "--"
 
-type stixID struct {
+// StixID represents a STIX type concatenated with a version 4 UUID
+type StixID struct {
 	Type string
 	ID   uuid.UUID
 }
 
-// newStixID contains a stix Type and an ID: a Version 4 UUID
+// NewStixID contains a stix Type and an ID: a Version 4 UUID
 //   128 bit; 16 octets of 32 hexadecimal numbers
 //   String representation: 32 bit - 16 bit - 16 bit - 16 bit - 48 bit
 //   Example:               6ba7b810-9dad-11d1-80b4-00c04fd430c8
 //
 // An optional uuid can be passed in and if valid will be converted to StixID type
-func newStixID(t string, u ...string) (stixID, error) {
-	s := stixID{Type: t}
+func NewStixID(t string, u ...string) (StixID, error) {
+	s := StixID{Type: t}
 
 	_, err := s.validType()
 	if err != nil {
@@ -36,11 +37,11 @@ func newStixID(t string, u ...string) (stixID, error) {
 	return s, err
 }
 
-func (s *stixID) String() string {
+func (s *StixID) String() string {
 	return s.Type + stixIDJoin + s.ID.String()
 }
 
-func (s *stixID) validate() (bool, error) {
+func (s *StixID) validate() (bool, error) {
 	valid, err := s.validType()
 	if err != nil {
 		return valid, err
@@ -50,14 +51,14 @@ func (s *stixID) validate() (bool, error) {
 	return valid, err
 }
 
-func (s *stixID) validType() (bool, error) {
+func (s *StixID) validType() (bool, error) {
 	if !validStixType(s.Type) {
 		return false, fmt.Errorf("Invalid type")
 	}
 	return true, nil
 }
 
-func (s *stixID) validID() (bool, error) {
+func (s *StixID) validID() (bool, error) {
 	empty := &uuid.UUID{}
 	if s.ID.String() == empty.String() {
 		return false, fmt.Errorf("Empty uuid")
@@ -74,7 +75,7 @@ func validStixID(s string) (bool, error) {
 		return false, fmt.Errorf("Invalid id")
 	}
 
-	id, err := newStixID(parts[0], parts[1])
+	id, err := NewStixID(parts[0], parts[1])
 	if err != nil {
 		return false, err
 	}

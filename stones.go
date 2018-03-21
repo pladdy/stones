@@ -1,3 +1,4 @@
+// Package stones is for STIX object validation
 package stones
 
 import (

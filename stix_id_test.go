@@ -17,7 +17,7 @@ func TestNewStixID(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result, err := newStixID(test.stixType, test.id)
+		result, err := NewStixID(test.stixType, test.id)
 		if !test.valid && err == nil {
 			t.Error("Should have generated an error", "Test:", test)
 		}
@@ -50,14 +50,14 @@ func TestValidStixID(t *testing.T) {
 }
 
 func TestStixIDValidate(t *testing.T) {
-	validStixID, _ := newStixID("bundle")
+	validStixID, _ := NewStixID("bundle")
 
 	tests := []struct {
-		id    stixID
+		id    StixID
 		valid bool
 	}{
 		{validStixID, true},
-		{stixID{}, false},
+		{StixID{}, false},
 	}
 
 	for _, test := range tests {

@@ -16,7 +16,7 @@ type Bundle struct {
 // NewBundle returns a STIX bundle object
 func NewBundle() (Bundle, error) {
 	b := Bundle{}
-	id, err := newStixID(bundleType)
+	id, err := NewStixID(bundleType)
 
 	b.ID = id.String()
 	b.Type = bundleType
