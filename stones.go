@@ -7,11 +7,42 @@ import (
 
 /* STIX types */
 
+// list of types
 const (
-	bundleType = "bundle"
+	attackPatternType  = "attack-pattern"
+	bundleType         = "bundle"
+	campaignType       = "campaign"
+	courseOfActionType = "course-of-action"
+	identityType       = "identity"
+	indicatorType      = "indicator"
+	intrusionSetType   = "intrusion-set"
+	malwareType        = "malware"
+	observedDataType   = "observed-data"
+	relationshipType   = "relationship"
+	reportType         = "report"
+	sightingType       = "sighting"
+	threatActorType    = "threat-actor"
+	toolType           = "tool"
+	vulnerabilityType  = "vulnerability"
 )
 
-var validStixTypes = map[string]bool{bundleType: true}
+// map of types used to validate
+var validStixTypes = map[string]bool{
+	attackPatternType:  true,
+	bundleType:         true,
+	campaignType:       true,
+	courseOfActionType: true,
+	identityType:       true,
+	indicatorType:      true,
+	intrusionSetType:   true,
+	malwareType:        true,
+	observedDataType:   true,
+	relationshipType:   true,
+	reportType:         true,
+	sightingType:       true,
+	threatActorType:    true,
+	toolType:           true,
+	vulnerabilityType:  true}
 
 func validStixType(s string) bool {
 	return validStixTypes[s]

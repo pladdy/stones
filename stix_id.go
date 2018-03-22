@@ -15,13 +15,13 @@ type StixID struct {
 	ID   uuid.UUID
 }
 
-// NewStixID contains a stix Type and an ID: a Version 4 UUID
-//   128 bit; 16 octets of 32 hexadecimal numbers
-//   String representation: 32 bit - 16 bit - 16 bit - 16 bit - 48 bit
-//   Example:               6ba7b810-9dad-11d1-80b4-00c04fd430c8
-//
-// An optional uuid can be passed in and if valid will be converted to StixID type
-func NewStixID(t string, u ...string) (StixID, error) {
+// NewStixID takes a STIX type and returns a StixID struct
+// The ID field is a v4 UUID
+//   v4 UUID:
+//     128 bit; 16 octets of 32 hexadecimal numbers
+//     String representation: 32 bit - 16 bit - 16 bit - 16 bit - 48 bit
+//     Example:               6ba7b810-9dad-11d1-80b4-00c04fd430c8
+func NewStixID(t string) (StixID, error) {
 	s := StixID{Type: t}
 
 	_, err := s.validType()
@@ -29,11 +29,7 @@ func NewStixID(t string, u ...string) (StixID, error) {
 		return s, err
 	}
 
-	if len(u) > 0 && len(u[0]) > 0 {
-		s.ID, err = uuid.FromString(u[0])
-	} else {
-		s.ID, err = uuid.NewV4()
-	}
+	s.ID, err = uuid.NewV4()
 	return s, err
 }
 
@@ -66,16 +62,25 @@ func (s *StixID) validID() (bool, error) {
 	return true, nil
 }
 
-func validStixID(s string) (bool, error) {
-	var err error
+/* helpers */
+
+// MarshalStixID takes a raw stix id string and converts it to a StixID type
+func MarshalStixID(id string) (StixID, error) {
 	var maxParts = 2
 
-	parts := strings.Split(s, stixIDJoin)
+	parts := strings.Split(id, stixIDJoin)
 	if len(parts) != maxParts {
-		return false, fmt.Errorf("Invalid id")
+		return StixID{}, fmt.Errorf("Invalid STIX ID")
 	}
+	s := StixID{Type: parts[0]}
 
-	id, err := NewStixID(parts[0], parts[1])
+	var err error
+	s.ID, err = uuid.FromString(parts[1])
+	return s, err
+}
+
+func validStixID(s string) (bool, error) {
+	id, err := MarshalStixID(s)
 	if err != nil {
 		return false, err
 	}

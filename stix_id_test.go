@@ -4,26 +4,46 @@ import (
 	"testing"
 )
 
-func TestNewStixID(t *testing.T) {
+func TestMarshalStixID(t *testing.T) {
 	tests := []struct {
-		stixType string
-		id       string
-		expected string
-		valid    bool
+		rawID        string
+		expectedType string
+		expectedID   string
 	}{
-		{"bundle", "6ba7b810-9dad-11d1-80b4-00c04fd430c8", "bundle--6ba7b810-9dad-11d1-80b4-00c04fd430c8", true},
-		{"nonType", "6ba7b810-9dad-11d1-80b4-00c04fd430c8", "nonType--00000000-0000-0000-0000-000000000000", false},
-		{"bundle", "error", "bundle--00000000-0000-0000-0000-000000000000", false},
+		{"bundle--6ba7b810-9dad-11d1-80b4-00c04fd430c8", "bundle", "6ba7b810-9dad-11d1-80b4-00c04fd430c8"},
+		{"bundle--bad", "bundle", "00000000-0000-0000-0000-000000000000"},
 	}
 
 	for _, test := range tests {
-		result, err := NewStixID(test.stixType, test.id)
+		s, _ := MarshalStixID(test.rawID)
+		if s.Type != test.expectedType {
+			t.Error("Got:", s.Type, "Expected:", test.expectedType)
+		}
+
+		if s.ID.String() != test.expectedID {
+			t.Error("Got:", s.ID.String(), "Expected:", test.expectedID)
+		}
+	}
+}
+
+func TestNewStixID(t *testing.T) {
+	tests := []struct {
+		stixType     string
+		expectedType string
+		valid        bool
+	}{
+		{"bundle", "bundle", true},
+		{"nonType", "nonType", false},
+	}
+
+	for _, test := range tests {
+		result, err := NewStixID(test.stixType)
 		if !test.valid && err == nil {
 			t.Error("Should have generated an error", "Test:", test)
 		}
 
-		if result.String() != test.expected {
-			t.Error("Got:", result, "Expected:", test.expected)
+		if result.Type != test.expectedType {
+			t.Error("Got:", result, "Expected:", test.expectedType)
 		}
 	}
 }
