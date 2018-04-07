@@ -19,7 +19,7 @@ fmt:
 	go fmt -x
 
 reportcard: fmt
-	gocyclo -over 15 .
+	gocyclo -over 10 .
 	golint
 	go vet
 

@@ -49,7 +49,7 @@ func (s *StixID) validate() (bool, error) {
 
 func (s *StixID) validType() (bool, error) {
 	if !validStixType(s.Type) {
-		return false, fmt.Errorf("Invalid type")
+		return false, fmt.Errorf("Invalid STIX type: %v", s.Type)
 	}
 	return true, nil
 }
