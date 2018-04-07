@@ -1,5 +1,5 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/pladdy/stones)](https://goreportcard.com/report/github.com/pladdy/stones)
-[![Coverage Status](https://coveralls.io/repos/github/pladdy/stones/badge.svg)](https://coveralls.io/github/pladdy/stones)
+[![Code Coverage](https://codecov.io/gh/pladdy/stones/branch/master/graph/badge.svg)](https://codecov.io/gh/pladdy/stones)
 [![Build Status](https://travis-ci.org/pladdy/stones.svg?branch=master)](https://travis-ci.org/pladdy/stones)
 
 ## stones
