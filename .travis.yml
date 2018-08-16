@@ -9,8 +9,7 @@ before_install:
   - sudo apt-get -qq update
 
 script:
-  - make
-  - go test -v -coverprofile=coverage.txt -covermode=atomic
+  - make & make coverage.txt
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

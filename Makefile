@@ -1,3 +1,5 @@
+.PHONY: coverage.txt
+
 all: dependencies test
 
 cover:
@@ -9,6 +11,9 @@ ifeq ("$(html)","true")
 	go tool cover -html=cover.out
 endif
 	@rm cover.out
+
+coverage.txt:
+	go test -v -coverprofile=$@ -covermode=atomic
 
 dependencies:
 	go get
