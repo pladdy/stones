@@ -16,7 +16,7 @@ coverage.txt:
 	go test -v -coverprofile=$@ -covermode=atomic
 
 dependencies:
-	go get
+	go get ./...
 	go get github.com/fzipp/gocyclo
 	go get github.com/golang/lint
 
