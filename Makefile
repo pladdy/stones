@@ -1,3 +1,5 @@
+.PHONY: coverage.txt
+
 all: dependencies test
 
 cover:
@@ -10,8 +12,11 @@ ifeq ("$(html)","true")
 endif
 	@rm cover.out
 
+coverage.txt:
+	go test -v -coverprofile=$@ -covermode=atomic
+
 dependencies:
-	go get
+	go get -t -v  ./...
 	go get github.com/fzipp/gocyclo
 	go get github.com/golang/lint
 

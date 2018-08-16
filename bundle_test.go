@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 )
 
 func TestNewBundle(t *testing.T) {
