@@ -9,6 +9,17 @@ import (
 
 const stixIDJoin = "--"
 
+// ID represents a STIX ID, example: malware--31b940d4-6f7f-459a-80ea-9c1f17b5891b
+type ID string
+
+// Valid returns true if the ID is a valid stix id
+func (i *ID) Valid() bool {
+	if _, err := MarshalStixID(fmt.Sprint(*i)); err != nil {
+		return false
+	}
+	return true
+}
+
 // StixID represents a STIX type concatenated with a version 4 UUID
 type StixID struct {
 	Type string

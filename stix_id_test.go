@@ -4,6 +4,25 @@ import (
 	"testing"
 )
 
+func TestIDValid(t *testing.T) {
+	tests := []struct {
+		id    string
+		valid bool
+	}{
+		{"malware--31b940d4-6f7f-459a-80ea-9c1f17b5891b", true},
+		{"31b940d4-6f7f-459a-80ea-9c1f17b5891b", false},
+		{"malware", false},
+		{"", false},
+	}
+
+	for _, test := range tests {
+		id := ID(test.id)
+		if id.Valid() != test.valid {
+			t.Error("Got:", id.Valid(), "Expected:", test.valid, "ID:", id)
+		}
+	}
+}
+
 func TestMarshalStixID(t *testing.T) {
 	tests := []struct {
 		rawID        string
