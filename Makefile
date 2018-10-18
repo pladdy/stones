@@ -1,6 +1,6 @@
-.PHONY: coverage.txt
+.PHONY: bench cover coverage.txt dependencies fmt reportcard test test_failures
 
-all: bench dependencies test
+all: dependencies test
 
 bench:
 	go test -bench .
