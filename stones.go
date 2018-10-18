@@ -48,14 +48,14 @@ func validStixType(s string) bool {
 	return validStixTypes[s]
 }
 
-/* Validator */
-
 const specVersion = "2.0"
 
 // Validator specfies what methods each object should implement for validation
 type Validator interface {
-	Validate() (bool error)
+	Valid() (bool, []error)
 }
+
+/* helpers */
 
 func invalidType() error {
 	return fmt.Errorf(`STIX Type is invalid`)

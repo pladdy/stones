@@ -1,6 +1,9 @@
 .PHONY: coverage.txt
 
-all: dependencies test
+all: bench dependencies test
+
+bench:
+	go test -bench .
 
 cover:
 	go test -v -coverprofile=cover.out

@@ -16,7 +16,7 @@ type Bundle struct {
 // NewBundle returns a STIX bundle object
 func NewBundle() (Bundle, error) {
 	b := Bundle{}
-	id, err := NewStixID(bundleType)
+	id, err := NewIdentifier(bundleType)
 
 	b.ID = id.String()
 	b.Type = bundleType
@@ -28,22 +28,17 @@ func NewBundle() (Bundle, error) {
 // AddObject adds a object to the bundle
 func (b *Bundle) AddObject(o string) {
 	bundle := *b
-
 	bundle.Objects = append(bundle.Objects, json.RawMessage(o))
-
 	*b = bundle
 }
 
-// Validate is called to validate a bundle
-func (b *Bundle) Validate() (bool, []error) {
-	var errs []error
-
+// Valid is called to validate a bundle
+func (b *Bundle) Valid() (valid bool, errs []error) {
 	if b.Type != bundleType {
 		errs = append(errs, invalidType())
 	}
 
-	valid, err := validStixID(b.ID)
-	if !valid {
+	if _, err := UnmarshalIdentifier(b.ID); err != nil {
 		errs = append(errs, invalidID(err))
 	}
 
@@ -56,7 +51,7 @@ func (b *Bundle) Validate() (bool, []error) {
 	}
 
 	if len(errs) == 0 {
-		return true, errs
+		valid = true
 	}
-	return false, errs
+	return valid, errs
 }
