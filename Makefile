@@ -21,7 +21,7 @@ coverage.txt:
 dependencies:
 	go get -t -v  ./...
 	go get github.com/fzipp/gocyclo
-	go get github.com/golang/lint
+	go get golang.org/x/lint/golint
 
 fmt:
 	go fmt -x
