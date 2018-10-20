@@ -1,6 +1,7 @@
 package stones
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -8,20 +9,6 @@ import (
 )
 
 const identifierJoin = "--"
-
-// ID is a string representation of an Identifier (example malware--6ba7b810-9dad-11d1-80b4-00c04fd430c8)
-// it exists to more easily unmarshal a database value into an ID (vs unmarshalling a string into an Identifier
-// struct).
-type ID string
-
-// Valid returns true if the ID is a valid Identifier
-func (id *ID) Valid() (bool, error) {
-	_, err := UnmarshalIdentifier(fmt.Sprint(*id))
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
 
 // Identifier represents a STIX type concatenated with a version 4 UUID
 type Identifier struct {
@@ -43,6 +30,33 @@ func NewIdentifier(t string) (id Identifier, err error) {
 
 func (id *Identifier) String() string {
 	return strings.Join([]string{id.Type, id.ID.String()}, identifierJoin)
+}
+
+// IdentifierFromString takes a identifier string and returns an Identifier
+func IdentifierFromString(s string) (id Identifier, err error) {
+	var maxParts = 2
+
+	parts := strings.Split(s, identifierJoin)
+	if len(parts) != maxParts {
+		return id, fmt.Errorf("Invalid STIX ID")
+	}
+
+	id.Type = parts[0]
+	id.ID, err = uuid.FromString(parts[1])
+	return
+}
+
+// UnmarshalJSON is used by encoding/json.Unmarshal to Unmarshal JSON encodings to Identifier types
+func (id *Identifier) UnmarshalJSON(b []byte) error {
+	var s string
+	err := json.Unmarshal(b, &s)
+	if err != nil {
+		return err
+	}
+
+	newID, err := IdentifierFromString(s)
+	id.Type, id.ID = newID.Type, newID.ID
+	return err
 }
 
 // Valid will validate the Identifier
@@ -67,21 +81,4 @@ func (id *Identifier) validID() bool {
 		return false
 	}
 	return true
-}
-
-/* helpers */
-
-// UnmarshalIdentifier takes a STIX identifier string and converts it to a Identifier type
-func UnmarshalIdentifier(raw string) (Identifier, error) {
-	var maxParts = 2
-
-	parts := strings.Split(raw, identifierJoin)
-	if len(parts) != maxParts {
-		return Identifier{}, fmt.Errorf("Invalid STIX ID")
-	}
-	id := Identifier{Type: parts[0]}
-
-	var err error
-	id.ID, err = uuid.FromString(parts[1])
-	return id, err
 }

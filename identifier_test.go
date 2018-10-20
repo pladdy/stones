@@ -2,47 +2,63 @@ package stones
 
 import (
 	"testing"
+
+	"github.com/gofrs/uuid"
 )
 
-func TestIDValid(t *testing.T) {
+func TestIdentifierUnmarshalJSON(t *testing.T) {
+	testUUID, _ := uuid.FromString("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+
 	tests := []struct {
-		id    string
-		valid bool
+		rawJSON            string
+		expectedIdentifier Identifier
+		expectError        bool
 	}{
-		{"malware--31b940d4-6f7f-459a-80ea-9c1f17b5891b", true},
-		{"31b940d4-6f7f-459a-80ea-9c1f17b5891b", false},
-		{"malware", false},
-		{"", false},
+		{`"bundle--6ba7b810-9dad-11d1-80b4-00c04fd430c8"`, Identifier{Type: "bundle", ID: testUUID}, false},
+		{`bundle--6ba7b810-9dad-11d1-80b4-00c04fd430c8`, Identifier{Type: "bundle", ID: testUUID}, true},
+		{`"6ba7b810-9dad-11d1-80b4-00c04fd430c8"`, Identifier{Type: "bundle", ID: testUUID}, true},
 	}
 
 	for _, test := range tests {
-		id := ID(test.id)
-		valid, err := id.Valid()
+		eid := test.expectedIdentifier
 
-		if valid != test.valid {
-			t.Error("Got:", valid, "Expected:", test.valid, "ID:", id, "Error:", err)
+		var id Identifier
+		err := id.UnmarshalJSON([]byte(test.rawJSON))
+
+		if test.expectError {
+			if err == nil {
+				t.Error("Expected error")
+			}
+		} else {
+			if err != nil {
+				t.Error(err)
+			}
+			if id.Type != eid.Type {
+				t.Error("Got:", id.Type, "Expected:", eid.Type)
+			}
+
+			if id.ID.String() != eid.ID.String() {
+				t.Error("Got:", id.ID.String(), "Expected:", eid.ID.String())
+			}
 		}
 	}
 }
 
-func TestUnmarshalIdentifier(t *testing.T) {
+func TestIdentifierValid(t *testing.T) {
+	validIdentifier, _ := NewIdentifier("bundle")
+
 	tests := []struct {
-		rawID        string
-		expectedType string
-		expectedID   string
+		id    Identifier
+		valid bool
 	}{
-		{"bundle--6ba7b810-9dad-11d1-80b4-00c04fd430c8", "bundle", "6ba7b810-9dad-11d1-80b4-00c04fd430c8"},
-		{"bundle--bad", "bundle", "00000000-0000-0000-0000-000000000000"},
+		{validIdentifier, true},
+		{Identifier{}, false},
 	}
 
 	for _, test := range tests {
-		s, _ := UnmarshalIdentifier(test.rawID)
-		if s.Type != test.expectedType {
-			t.Error("Got:", s.Type, "Expected:", test.expectedType)
-		}
-
-		if s.ID.String() != test.expectedID {
-			t.Error("Got:", s.ID.String(), "Expected:", test.expectedID)
+		valid, _ := test.id.Valid()
+		if valid != test.valid {
+			t.Error("Got:", valid, "Expected:", test.valid, "Test:", test)
 		}
 	}
 }
@@ -64,25 +80,6 @@ func TestNewIdentifier(t *testing.T) {
 
 		if err != nil {
 			t.Error("Got:", err, "Expected no error")
-		}
-	}
-}
-
-func TestIdentifierValid(t *testing.T) {
-	validIdentifier, _ := NewIdentifier("bundle")
-
-	tests := []struct {
-		id    Identifier
-		valid bool
-	}{
-		{validIdentifier, true},
-		{Identifier{}, false},
-	}
-
-	for _, test := range tests {
-		valid, _ := test.id.Valid()
-		if valid != test.valid {
-			t.Error("Got:", valid, "Expected:", test.valid, "Test:", test)
 		}
 	}
 }

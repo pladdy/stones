@@ -11,7 +11,6 @@ import (
 
 func TestBundleValid(t *testing.T) {
 	id, _ := NewIdentifier("bundle")
-	ids := id.String()
 
 	b, err := ioutil.ReadFile("testdata/malware_bundle.json")
 	if err != nil {
@@ -24,19 +23,19 @@ func TestBundleValid(t *testing.T) {
 		valid  bool
 		errs   []error
 	}{
-		{bundle: Bundle{Type: "fail", ID: ids, SpecVersion: specVersion, Objects: objects},
+		{bundle: Bundle{Type: "fail", ID: id, SpecVersion: specVersion, Objects: objects},
 			valid: false,
 			errs:  []error{errors.New("wrong type")}},
-		{bundle: Bundle{Type: "bundle", ID: ids, SpecVersion: "1.0", Objects: objects},
+		{bundle: Bundle{Type: "bundle", ID: id, SpecVersion: "1.0", Objects: objects},
 			valid: false,
 			errs:  []error{errors.New("wrong spec version")}},
 		{bundle: Bundle{Type: "bundle", SpecVersion: specVersion, Objects: objects},
 			valid: false,
-			errs:  []error{errors.New("no id")}},
-		{bundle: Bundle{Type: "bundle", ID: ids, SpecVersion: specVersion, Objects: []json.RawMessage{}},
+			errs:  []error{errors.New("no id"), errors.New("invalid stix type")}},
+		{bundle: Bundle{Type: "bundle", ID: id, SpecVersion: specVersion, Objects: []json.RawMessage{}},
 			valid: false,
 			errs:  []error{errors.New("no objects")}},
-		{bundle: Bundle{Type: "bundle", ID: ids, SpecVersion: specVersion, Objects: objects},
+		{bundle: Bundle{Type: "bundle", ID: id, SpecVersion: specVersion, Objects: objects},
 			valid: true,
 			errs:  []error{}},
 	}
@@ -48,14 +47,17 @@ func TestBundleValid(t *testing.T) {
 			t.Error("Got:", valid, "Expected:", test.valid)
 		}
 
-		if len(test.errs) != len(errs) {
-			t.Error("Got:", len(test.errs), "Expected:", len(errs))
+		if len(errs) != len(test.errs) {
+			t.Error("Got:", len(errs), "Expected:", len(test.errs))
 		}
 	}
 }
 
 func TestMarshalBundle(t *testing.T) {
-	bundle := Bundle{Type: "bundle", ID: "bundle--5d0092c5-5f74-4287-9642-33f4c354e56d", SpecVersion: "2.0"}
+	id := Identifier{Type: "bundle"}
+	id.ID, _ = uuid.FromString("5d0092c5-5f74-4287-9642-33f4c354e56d")
+
+	bundle := Bundle{Type: "bundle", ID: id, SpecVersion: "2.0"}
 	bundle.AddObject(`{"type": "malware", "id": "malware--31b940d4-6f7f-459a-80ea-9c1f17b5891b"}`)
 
 	if len(bundle.Objects) != 1 {
@@ -67,6 +69,7 @@ func TestMarshalBundle(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// no whitespace for exact matching; seems brittle...
 	expected := `{"type":"bundle","id":"bundle--5d0092c5-5f74-4287-9642-33f4c354e56d","spec_version":"2.0",` +
 		`"objects":[{"type":"malware","id":"malware--31b940d4-6f7f-459a-80ea-9c1f17b5891b"}]}`
 
@@ -79,8 +82,8 @@ func TestNewBundle(t *testing.T) {
 	b, _ := NewBundle()
 	empty := uuid.UUID{}
 
-	if b.ID == empty.String() {
-		t.Error("Got:", b.ID, "Expected: Not an empty UUID", empty.String())
+	if b.ID.String() == empty.String() {
+		t.Error("Got:", b.ID.String(), "Expected: Not an empty UUID", empty.String())
 	}
 }
 
@@ -91,7 +94,6 @@ func TestUnmarshalBundle(t *testing.T) {
 	}
 
 	var bundle Bundle
-
 	err = json.Unmarshal(b, &bundle)
 	if err != nil {
 		t.Fatal(err)

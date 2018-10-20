@@ -18,6 +18,9 @@ endif
 coverage.txt:
 	go test -v -coverprofile=$@ -covermode=atomic
 
+cover-html:
+	$(MAKE) cover html=true
+
 dependencies:
 	go get -t -v  ./...
 	go get github.com/fzipp/gocyclo
