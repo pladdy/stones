@@ -14,4 +14,6 @@ type Object struct {
 	ExternalReferences []ExternalReference `json:"external_references,omitempty"`
 	ObjectMarkingRefs  []Identifier        `json:"object_marking_refs,omitempty"`
 	GranularMarkings   []string            `json:"granular_markings,omitempty"`
+	// provenance
+	Source []byte
 }

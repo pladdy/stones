@@ -32,6 +32,11 @@ func NewBundle() (b Bundle, err error) {
 
 // AddObject adds a object to the bundle
 func (b *Bundle) AddObject(o string) {
+	// skip empty objects
+	if len(o) == 0 {
+		return
+	}
+
 	bundle := *b
 	bundle.Objects = append(bundle.Objects, json.RawMessage(o))
 	*b = bundle

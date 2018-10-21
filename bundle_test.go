@@ -9,6 +9,25 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+func TestBundleAddObject(t *testing.T) {
+	tests := []struct {
+		objectToAdd     string
+		objectsInBundle int
+	}{
+		{``, 0},
+		{`{"type": "malware"}`, 1},
+	}
+
+	for _, test := range tests {
+		b, _ := NewBundle()
+		b.AddObject(test.objectToAdd)
+
+		if len(b.Objects) != test.objectsInBundle {
+			t.Error("Got:", len(b.Objects), "Expected:", test.objectsInBundle)
+		}
+	}
+}
+
 func TestBundleValid(t *testing.T) {
 	id, _ := NewIdentifier("bundle")
 
