@@ -1,6 +1,9 @@
-.PHONY: coverage.txt
+.PHONY: bench cover coverage.txt dependencies fmt reportcard test test_failures
 
 all: dependencies test
+
+bench:
+	go test -bench .
 
 cover:
 	go test -v -coverprofile=cover.out
@@ -15,10 +18,13 @@ endif
 coverage.txt:
 	go test -v -coverprofile=$@ -covermode=atomic
 
+cover-html:
+	$(MAKE) cover html=true
+
 dependencies:
 	go get -t -v  ./...
 	go get github.com/fzipp/gocyclo
-	go get github.com/golang/lint
+	go get golang.org/x/lint/golint
 
 fmt:
 	go fmt -x
