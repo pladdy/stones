@@ -7,15 +7,17 @@ import (
 
 // Bundle is a STIX bundle: a collection of STIX objects
 type Bundle struct {
-	Type        string            `json:"type"`
-	ID          Identifier        `json:"id"`
-	SpecVersion string            `json:"spec_version"`
-	Objects     []json.RawMessage `json:"objects"`
+	// required
+	Type        string     `json:"type"`
+	ID          Identifier `json:"id"`
+	SpecVersion string     `json:"spec_version"`
+	// optional
+	Objects []json.RawMessage `json:"objects"`
 }
 
-// BundleMarshal is for custom marshaling of the bundle; it acts as a helper to create an object with
+// for custom marshaling of the bundle; it acts as a helper to create an object with
 // the ID represented as a identifier string
-type BundleMarshal struct {
+type bundleMarshal struct {
 	Type        string            `json:"type"`
 	ID          string            `json:"id"`
 	SpecVersion string            `json:"spec_version"`
@@ -42,10 +44,10 @@ func (b *Bundle) AddObject(o string) {
 	*b = bundle
 }
 
-// MarshalJSON serialize a bundle into JSON
+// MarshalJSON serializes a bundle into JSON
 // this function converts the Identifier type of the ID field to a identifier string representation
 func (b Bundle) MarshalJSON() ([]byte, error) {
-	return json.Marshal(BundleMarshal{Type: b.Type, ID: b.ID.String(), SpecVersion: b.SpecVersion, Objects: b.Objects})
+	return json.Marshal(bundleMarshal{Type: b.Type, ID: b.ID.String(), SpecVersion: b.SpecVersion, Objects: b.Objects})
 }
 
 // Valid is called to validate a bundle
@@ -70,6 +72,5 @@ func (b *Bundle) Valid() (valid bool, errs []error) {
 	if len(errs) == 0 {
 		valid = true
 	}
-
 	return valid, errs
 }
