@@ -59,25 +59,30 @@ func (id *Identifier) UnmarshalJSON(b []byte) error {
 	return err
 }
 
-// Valid will validate the Identifier
-func (id *Identifier) Valid() (result bool, errs []error) {
-	result = true
-
+// Valid will validate an Identifier
+func (id *Identifier) Valid() (valid bool, errs []error) {
 	if !validStixType(id.Type) {
 		errs = append(errs, fmt.Errorf("Invalid STIX type: %v", id.Type))
-		result = false
 	}
 
 	if !id.validID() {
 		errs = append(errs, fmt.Errorf("Invalid identifier: %v", id.Type))
-		result = false
+	}
+
+	if len(errs) == 0 {
+		valid = true
 	}
 	return
 }
 
 func (id *Identifier) validID() bool {
 	empty := &uuid.UUID{}
+
 	if id.ID.String() == empty.String() {
+		return false
+	}
+
+	if id.ID.Version() != uuid.V4 {
 		return false
 	}
 	return true
