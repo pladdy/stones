@@ -34,7 +34,7 @@ func IdentifierFromString(s string) (id Identifier, err error) {
 
 	parts := strings.Split(s, identifierJoin)
 	if len(parts) != maxParts {
-		return id, fmt.Errorf("Invalid STIX ID")
+		return id, fmt.Errorf("Invalid STIX ID: %v", s)
 	}
 
 	id.Type = parts[0]

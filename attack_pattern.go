@@ -5,9 +5,9 @@ import "fmt"
 // AttackPattern is a TTP (Tactic, technique, or procedure) that describes how advesaries attempt to compromise targets
 type AttackPattern struct {
 	Object
-	Name            string
-	Description     string
-	KillChainPhases []KillChainPhase
+	Name            string           `stones:"required"`
+	Description     string           `stones:"optional"`
+	KillChainPhases []KillChainPhase `stones:"optional"`
 }
 
 // NewAttackPattern returns an AttackPattern object
