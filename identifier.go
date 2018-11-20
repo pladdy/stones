@@ -28,10 +28,6 @@ func NewIdentifier(t string) (id Identifier, err error) {
 	return id, err
 }
 
-func (id *Identifier) String() string {
-	return strings.Join([]string{id.Type, id.ID.String()}, identifierJoin)
-}
-
 // IdentifierFromString takes a identifier string and returns an Identifier
 func IdentifierFromString(s string) (id Identifier, err error) {
 	var maxParts = 2
@@ -44,6 +40,15 @@ func IdentifierFromString(s string) (id Identifier, err error) {
 	id.Type = parts[0]
 	id.ID, err = uuid.FromString(parts[1])
 	return
+}
+
+// MarshalJSON is used to serialize an Identifier into JSON format
+func (id Identifier) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + id.String() + `"`), nil
+}
+
+func (id *Identifier) String() string {
+	return strings.Join([]string{id.Type, id.ID.String()}, identifierJoin)
 }
 
 // UnmarshalJSON is used by encoding/json.Unmarshal to Unmarshal JSON encodings to Identifier types
