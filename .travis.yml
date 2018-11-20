@@ -8,7 +8,7 @@ before_install:
   - sudo apt-get -qq update
 
 script:
-  - make && make coverage.txt
+  - make && make sec && make coverage.txt
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

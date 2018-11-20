@@ -1,4 +1,4 @@
-.PHONY: bench cover coverage.txt dependencies fmt reportcard test test_failures
+.PHONY: bench cover coverage.txt dependencies fmt reportcard sec test test_failures
 
 all: dependencies test
 
@@ -25,6 +25,7 @@ dependencies:
 	go get -t -v  ./...
 	go get github.com/fzipp/gocyclo
 	go get golang.org/x/lint/golint
+	go get github.com/securego/gosec/cmd/gosec/...
 
 fmt:
 	go fmt -x
@@ -33,6 +34,9 @@ reportcard: fmt
 	gocyclo -over 10 .
 	golint
 	go vet
+
+sec:
+	gosec ./...
 
 test:
 	go test -v -cover ./...

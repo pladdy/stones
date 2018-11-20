@@ -29,7 +29,10 @@ func TestBundleAddObject(t *testing.T) {
 }
 
 func TestBundleValid(t *testing.T) {
-	id, _ := NewIdentifier("bundle")
+	id, err := NewIdentifier("bundle")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	b, err := ioutil.ReadFile("testdata/malware_bundle.json")
 	if err != nil {
@@ -73,17 +76,15 @@ func TestBundleValid(t *testing.T) {
 }
 
 func TestMarshalBundle(t *testing.T) {
-	id := Identifier{Type: "bundle"}
-	id.ID, _ = uuid.FromString("5d0092c5-5f74-4287-9642-33f4c354e56d")
+	id, err := IdentifierFromString("bundle--5d0092c5-5f74-4287-9642-33f4c354e56d")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	bundle := Bundle{Type: "bundle", ID: id, SpecVersion: "2.0"}
 	bundle.AddObject(`{"type": "malware", "id": "malware--31b940d4-6f7f-459a-80ea-9c1f17b5891b"}`)
 
-	if len(bundle.Objects) != 1 {
-		t.Error("Got:", len(bundle.Objects), "Expected:", 1)
-	}
-
-	b, err := json.Marshal(bundle)
+	b, err := json.Marshal(&bundle)
 	if err != nil {
 		t.Fatal(err)
 	}

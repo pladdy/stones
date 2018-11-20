@@ -15,15 +15,6 @@ type Bundle struct {
 	Objects []json.RawMessage `json:"objects"`
 }
 
-// for custom marshaling of the bundle; it acts as a helper to create an object with
-// the ID represented as a identifier string
-type bundleMarshal struct {
-	Type        string            `json:"type"`
-	ID          string            `json:"id"`
-	SpecVersion string            `json:"spec_version"`
-	Objects     []json.RawMessage `json:"objects"`
-}
-
 // NewBundle returns a STIX bundle object
 func NewBundle() (b Bundle, err error) {
 	b.ID, err = NewIdentifier(bundleType)
@@ -42,12 +33,6 @@ func (b *Bundle) AddObject(o string) {
 	bundle := *b
 	bundle.Objects = append(bundle.Objects, json.RawMessage(o))
 	*b = bundle
-}
-
-// MarshalJSON serializes a bundle into JSON
-// this function converts the Identifier type of the ID field to a identifier string representation
-func (b Bundle) MarshalJSON() ([]byte, error) {
-	return json.Marshal(bundleMarshal{Type: b.Type, ID: b.ID.String(), SpecVersion: b.SpecVersion, Objects: b.Objects})
 }
 
 // Valid is called to validate a bundle

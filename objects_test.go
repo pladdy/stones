@@ -1,64 +1,34 @@
 package stones
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"testing"
-
-	"github.com/gofrs/uuid"
 )
 
-func TestNewAttackPattern(t *testing.T) {
-	tests := []struct {
-		name      string
-		hasErrors bool
-	}{
-		{"", false},
-		{"some attack pattern", false},
+func TestNewObject(t *testing.T) {
+	b, err := ioutil.ReadFile("testdata/malware.json")
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	for _, test := range tests {
-		result, err := NewAttackPattern(test.name)
-
-		if test.hasErrors && err == nil {
-			t.Error("Got:", result, "Expected an error, test:", test)
-		}
+	_, err = NewObject(b)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
-func TestAttackPatternValid(t *testing.T) {
-	testID, err := NewIdentifier(attackPatternType)
+func TestObjectSerializeDeserialize(t *testing.T) {
+	in, err := ioutil.ReadFile("testdata/malware.json")
+
+	var o Object
+	err = json.Unmarshal(in, &o)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	invalidID, err := NewIdentifier(attackPatternType)
+	_, err = json.Marshal(o)
 	if err != nil {
 		t.Fatal(err)
-	}
-	invalidID.ID = uuid.UUID{}
-
-	tests := []struct {
-		newType string
-		id      Identifier
-		name    string
-		valid   bool
-	}{
-		{"", testID, "", false},
-		{attackPatternType, testID, "", false},
-		{attackPatternType, invalidID, "test", false},
-		{attackPatternType, testID, "test", true},
-	}
-
-	for _, test := range tests {
-		// set up object
-		ap := AttackPattern{}
-		ap.ID = test.id
-		ap.Type = test.newType
-		ap.Name = test.name
-
-		valid, _ := ap.Valid()
-
-		if valid != test.valid {
-			t.Error("Got:", valid, "Expected:", test.valid, "Test:", test, "Attack Pattern:", ap)
-		}
 	}
 }
