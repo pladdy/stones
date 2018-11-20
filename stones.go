@@ -3,7 +3,6 @@ package stones
 
 import (
 	"fmt"
-	"time"
 )
 
 const specVersion = "2.0"
@@ -164,16 +163,6 @@ type KillChainPhase struct {
 // 	// each field is a required string
 // 	return true, []error{}
 // }
-
-// Timestamp represents a a STIX date/time format
-// alias works (type Timestamp = time.Time) but can't extend it
-type Timestamp struct {
-	time.Time
-}
-
-func (t *Timestamp) String() string {
-	return t.Format(time.RFC3339Nano)
-}
 
 // Validator specfies what methods each object should implement for validation
 type Validator interface {
