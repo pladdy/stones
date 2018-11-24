@@ -140,3 +140,24 @@ func TestUnmarshalBundle(t *testing.T) {
 		t.Error("Got:", string(b), "Expected:", expected)
 	}
 }
+
+func TestUnmarshalBundleInvalid(t *testing.T) {
+	tests := []struct {
+		testFile      string
+		expectedError string
+	}{
+		{"testdata/malware_bundle_no_objects.json", "no objects"},
+	}
+
+	for _, test := range tests {
+		b, err := ioutil.ReadFile(test.testFile)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var bundle Bundle
+		if err := json.Unmarshal(b, &bundle); err == nil {
+			t.Error("Expected error:", test.expectedError)
+		}
+	}
+}

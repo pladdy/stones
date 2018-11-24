@@ -7,12 +7,7 @@ import (
 )
 
 func TestNewObject(t *testing.T) {
-	b, err := ioutil.ReadFile("testdata/malware.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	_, err = NewObject(b)
+	_, err := NewObject("malware")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,11 +44,13 @@ func TestObjectValid(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		o, err := NewObject(b)
-		if err != nil {
-			t.Fatal(err)
+		// ignore the error from Unmarshal (which will include any Validation errors
+		var o Object
+		if err := json.Unmarshal(b, &o); err == nil && test.expectError {
+			t.Error("Expected an error for object:", string(b))
 		}
 
+		// test Valid itself
 		_, errs := o.Valid()
 		if test.expectError && len(errs) == 0 {
 			t.Error("Expected error, Test:", test, "Object:", o)
