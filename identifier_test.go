@@ -25,14 +25,11 @@ func TestIdentifierUnmarshalJSON(t *testing.T) {
 		var id Identifier
 		err := id.UnmarshalJSON([]byte(test.rawJSON))
 
-		if test.expectError {
-			if err == nil {
-				t.Error("Expected error")
-			}
-		} else {
-			if err != nil {
-				t.Error(err)
-			}
+		if test.expectError && err == nil {
+			t.Error("Expected error for test:", test)
+		}
+
+		if !test.expectError && err != nil {
 			if id.Type != eid.Type {
 				t.Error("Got:", id.Type, "Expected:", eid.Type)
 			}

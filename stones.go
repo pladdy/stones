@@ -169,6 +169,10 @@ type Validator interface {
 	Valid() (bool, []error)
 }
 
+func validationErrors(errs []error) error {
+	return fmt.Errorf(fmt.Sprintf("Errors: %v", errs))
+}
+
 /* helpers */
 
 func invalidType() error {
