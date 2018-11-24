@@ -73,9 +73,7 @@ func (id *Identifier) UnmarshalJSON(b []byte) error {
 	id.Type, id.ID = newID.Type, newID.ID
 
 	if valid, errs := id.Valid(); !valid {
-		if err != nil {
-			errs = append([]error{err}, errs...)
-		}
+		errs = pushError(err, errs)
 		return validationErrors(errs)
 	}
 
@@ -112,4 +110,13 @@ func (id *Identifier) validID() bool {
 		return false
 	}
 	return true
+}
+
+/* helpers */
+
+func pushError(e error, es []error) []error {
+	if e != nil {
+		return append([]error{e}, es...)
+	}
+	return es
 }
