@@ -2,13 +2,7 @@ package stones
 
 import (
 	"testing"
-
-	"github.com/sanity-io/litter"
 )
-
-func init() {
-	litter.Config.Compact = true
-}
 
 func TestNewAttackPattern(t *testing.T) {
 	tests := []struct {
