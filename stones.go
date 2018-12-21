@@ -2,6 +2,7 @@
 package stones
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -159,18 +160,24 @@ type KillChainPhase struct {
 }
 
 // Valid will run validation on a KillChainPhase
-// func (k *KillChainPhase) Valid() (bool, []error) {
-// 	// each field is a required string
-// 	return true, []error{}
-// }
+func (k *KillChainPhase) Valid() (valid bool, errs []error) {
+	if k.KillChainName == "" {
+		errs = append(errs, errors.New("KillChainName can't be empty"))
+	}
+
+	if k.PhaseName == "" {
+		errs = append(errs, errors.New("PhaseName can't be empty"))
+	}
+
+	if len(errs) == 0 {
+		valid = true
+	}
+	return
+}
 
 // Validator specfies what methods each object should implement for validation
 type Validator interface {
 	Valid() (bool, []error)
-}
-
-func validationErrors(errs []error) error {
-	return fmt.Errorf(fmt.Sprintf("Errors: %v", errs))
 }
 
 /* helpers */
@@ -181,4 +188,8 @@ func invalidType() error {
 
 func invalidSpecVersion() error {
 	return fmt.Errorf(`SpecVersion should be` + specVersion)
+}
+
+func validationErrors(errs []error) error {
+	return fmt.Errorf(fmt.Sprintf("Errors: %v", errs))
 }

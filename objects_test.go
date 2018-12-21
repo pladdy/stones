@@ -36,6 +36,8 @@ func TestObjectValid(t *testing.T) {
 		{"testdata/malware.json", false},
 		{"testdata/malware_invalid_type.json", true},
 		{"testdata/malware_type_mismatch.json", true},
+		{"testdata/malware_invalid_created.json", true},
+		{"testdata/malware_invalid_modified.json", true},
 	}
 
 	for _, test := range tests {

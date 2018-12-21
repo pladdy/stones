@@ -3,6 +3,7 @@ package stones
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 // Object is a generic STIX object with properties common to all SIIX objects.
@@ -17,7 +18,7 @@ type Object struct {
 	ExternalReferences []ExternalReference `json:"external_references,omitempty" stones:"optional"`
 	ObjectMarkingRefs  []Identifier        `json:"object_marking_refs,omitempty" stones:"optional"`
 	GranularMarkings   []string            `json:"granular_markings,omitempty" stones:"optional"`
-	Source             []byte              `stones:"optional"`
+	Source             []byte              `stones:"required"`
 }
 
 // NewObject takes a STIX Type as a string and returns an Object with that Type and a new ID.
@@ -32,8 +33,7 @@ func NewObject(t string) (o Object, err error) {
 // It will take JSON and deserialize to an Object.  This should not be called directly, but instead
 // json.Unmarshal(b []byte, v interface{}) should be used.
 //
-// Validation is run on the Object; if invalid, errors are returned as one error, but with errors messages
-// separated by semi-colons.
+// Validation is run on the Object; if invalid, validation errors are returned as one error.
 func (o *Object) UnmarshalJSON(d []byte) error {
 	// use an aliase to avoid infinite loop by using Unmarshal on the object
 	type ObjectAlias Object
@@ -44,30 +44,43 @@ func (o *Object) UnmarshalJSON(d []byte) error {
 	if err := json.Unmarshal(d, &alias); err != nil {
 		return err
 	}
+	o.Source = d
 
 	if valid, errs := o.Valid(); !valid {
 		return validationErrors(errs)
 	}
 
-	o.Source = d
 	return nil
 }
 
 // Valid is called to check for STiX 2.0 specification conformance.
 //
-// If the Object is invalid, it returns the list of errors from validation as one error.  The errors are separated
-// by semi-colons.
+// If the Object is invalid, it returns the list of errors from validation.
 func (o *Object) Valid() (valid bool, errs []error) {
 	if !validStixType(o.Type) {
-		errs = append(errs, fmt.Errorf("Invalid 'Type': %v;", o.Type))
+		errs = append(errs, fmt.Errorf("Invalid 'Type': %v", o.Type))
 	}
 
 	if valid, err := o.ID.Valid(); !valid {
-		errs = append(errs, fmt.Errorf("Invalid 'Identifier': %v, Error: %v;", o.ID, err))
+		errs = append(errs, fmt.Errorf("Invalid 'Identifier': %v, Error: %v", o.ID, err))
 	}
 
 	if o.Type != o.ID.Type {
-		errs = append(errs, fmt.Errorf("Object 'Type' (%v) and 'Identfier' Type (%v) must match;", o.Type, o.ID.Type))
+		errs = append(errs, fmt.Errorf("Object 'Type' (%v) and 'Identfier' Type (%v) must match", o.Type, o.ID.Type))
+	}
+
+	notSet := Timestamp{time.Time{}}
+
+	if o.Created == notSet {
+		errs = append(errs, fmt.Errorf("Created time must be set; should be > 1970-01-01 00:00:00Z"))
+	}
+
+	if o.Modified == notSet {
+		errs = append(errs, fmt.Errorf("Modified time must be set; should be > 1970-01-01 00:00:00Z"))
+	}
+
+	if len(o.Source) == 0 {
+		errs = append(errs, fmt.Errorf("Object 'Source' cannot be empty"))
 	}
 
 	if len(errs) == 0 {

@@ -82,8 +82,7 @@ func (id *Identifier) UnmarshalJSON(b []byte) error {
 
 // Valid is called to check for STiX 2.0 specification conformance.
 //
-// If the Identifier is invalid, it returns the list of errors from validation as one error.  The errors are separated
-// by semi-colons.
+// If the Identifier is invalid, it returns the list of errors from validation.
 func (id *Identifier) Valid() (valid bool, errs []error) {
 	if !validStixType(id.Type) {
 		errs = append(errs, fmt.Errorf("Invalid 'Type' in Identifier: %v", id.Type))
