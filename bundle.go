@@ -62,8 +62,7 @@ func (b *Bundle) UnmarshalJSON(d []byte) error {
 
 // Valid is called to check for STiX 2.0 specification conformance.
 //
-// If the Bundle is invalid, it returns the list of errors from validation as one error.  The errors are separated
-// by semi-colons.
+// If the Bundle is invalid, it returns the list of errors from validation.
 func (b *Bundle) Valid() (valid bool, errs []error) {
 	if b.Type != bundleType {
 		errs = append(errs, invalidType())
