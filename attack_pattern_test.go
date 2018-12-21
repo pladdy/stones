@@ -3,8 +3,12 @@ package stones
 import (
 	"testing"
 
-	"github.com/gofrs/uuid"
+	"github.com/sanity-io/litter"
 )
+
+func init() {
+	litter.Config.Compact = true
+}
 
 func TestNewAttackPattern(t *testing.T) {
 	tests := []struct {
@@ -24,41 +28,45 @@ func TestNewAttackPattern(t *testing.T) {
 	}
 }
 
-func TestAttackPatternValid(t *testing.T) {
-	testID, err := NewIdentifier(attackPatternType)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	invalidID, err := NewIdentifier(attackPatternType)
-	if err != nil {
-		t.Fatal(err)
-	}
-	invalidID.ID = uuid.UUID{}
-
+func TestAttackPatternValidNoKillChain(t *testing.T) {
 	tests := []struct {
-		newType string
-		id      Identifier
-		name    string
-		valid   bool
+		name  string
+		obj   Object
+		valid bool
 	}{
-		{"", testID, "", false},
-		{attackPatternType, testID, "", false},
-		{attackPatternType, invalidID, "test", false},
-		{attackPatternType, testID, "test", true},
+		{"", Object{}, false},
+		{"", Object{Type: attackPatternType}, false},
+		{"test", Object{}, false},
+		{"test", validTestObject(attackPatternType), true},
 	}
 
 	for _, test := range tests {
-		// set up object
-		ap := AttackPattern{}
-		ap.ID = test.id
-		ap.Type = test.newType
-		ap.Name = test.name
+		ap := AttackPattern{Object: test.obj, Name: test.name}
 
-		valid, _ := ap.Valid()
-
+		valid, errs := ap.Valid()
 		if valid != test.valid {
-			t.Error("Got:", valid, "Expected:", test.valid, "Test:", test, "Attack Pattern:", ap)
+			t.Error("Got:", valid, "Expected:", test.valid, "Test:", test, "Attack Pattern:", ap, "Errs:", errs)
+		}
+	}
+}
+
+func TestAttackPatternValidWithKillChain(t *testing.T) {
+	tests := []struct {
+		name            string
+		obj             Object
+		killChainPhases []KillChainPhase
+		valid           bool
+	}{
+		{"test", validTestObject(attackPatternType), []KillChainPhase{}, true},
+		{"test", validTestObject(attackPatternType), []KillChainPhase{KillChainPhase{PhaseName: "foo"}}, false},
+	}
+
+	for _, test := range tests {
+		ap := AttackPattern{Object: test.obj, Name: test.name, KillChainPhases: test.killChainPhases}
+
+		valid, errs := ap.Valid()
+		if valid != test.valid {
+			t.Error("Got:", valid, "Expected:", test.valid, "Test:", test, "Attack Pattern:", ap, "Errs:", errs)
 		}
 	}
 }
