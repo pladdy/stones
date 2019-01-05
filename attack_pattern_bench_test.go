@@ -1,6 +1,8 @@
 package stones
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"testing"
 )
 
@@ -22,5 +24,28 @@ func BenchmarkNewAttackPatternAndValid(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		attackPattern, _ := NewAttackPattern("test")
 		attackPattern.Valid()
+	}
+}
+
+func BenchmarkUnmarshalAttackPattern(b *testing.B) {
+	d, err := ioutil.ReadFile("testdata/attack_pattern.json")
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		var o AttackPattern
+		json.Unmarshal(d, &o)
+	}
+}
+
+func BenchmarkValidateAttackPattern(b *testing.B) {
+	d, err := ioutil.ReadFile("testdata/attack_pattern.json")
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		validAttackPattern(d)
 	}
 }
