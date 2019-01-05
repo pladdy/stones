@@ -81,6 +81,15 @@ var validStixTypes = map[string]bool{
 	toolType:           true,
 	vulnerabilityType:  true}
 
+// ErrorsToString converts a slice of errors to one error
+func ErrorsToString(errs []error) error {
+	s := []string{}
+	for _, err := range errs {
+		s = append(s, fmt.Sprintf("%v", err))
+	}
+	return fmt.Errorf(strings.Join(s, "; "))
+}
+
 // ExternalReference data type for pointing to references that are external to STIX
 type ExternalReference struct {
 	SourceName  string   `json:"source_name"`
@@ -146,14 +155,6 @@ func Validate(b []byte) (bool, []error) {
 }
 
 /* helpers */
-
-func errorsToString(errs []error) error {
-	s := []string{}
-	for _, err := range errs {
-		s = append(s, fmt.Sprintf("%v", err))
-	}
-	return fmt.Errorf(strings.Join(s, "; "))
-}
 
 func invalidType() error {
 	return fmt.Errorf(`STIX Type is invalid`)

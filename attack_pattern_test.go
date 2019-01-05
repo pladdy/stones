@@ -131,7 +131,7 @@ func TestValidAttackPattern(t *testing.T) {
 			t.Error(
 				"Got:", valid,
 				"Expected:", test.valid,
-				"Validation Errors:", errorsToString(errs),
+				"Validation Errors:", ErrorsToString(errs),
 				"Object:", string(test.object))
 		}
 	}

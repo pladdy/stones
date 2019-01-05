@@ -8,7 +8,7 @@ import (
 func TestErrorsToString(t *testing.T) {
 	errs := []error{fmt.Errorf("a fake error"), fmt.Errorf("another fake error")}
 
-	result := fmt.Sprintf("%v", errorsToString(errs))
+	result := fmt.Sprintf("%v", ErrorsToString(errs))
 	expected := "a fake error; another fake error"
 
 	if result != expected {
