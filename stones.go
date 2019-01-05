@@ -4,85 +4,34 @@ package stones
 import (
 	"errors"
 	"fmt"
+	"regexp"
+	"strings"
 )
 
 const specVersion = "2.0"
 
-// DomainObject represents a SDO (STIX Domain Object)
-type DomainObject int
-
-const (
-	// AttackPattern is a TTP that describes ways advesaries attempt to compromise targets
-	_AttackPattern DomainObject = 1 + iota
-	// Campaign is a grouping of behaviors describing malicious activites or attacks
-	_Campaign
-	// CourseOfAction is an action taken to prevent or respond to an attack
-	_CourseOfAction
-	// Identity represents individuals, groups, or organizations
-	_Identity
-	// Indicator contains a pattern that can be used to detect suspicious or malicious activity
-	_Indicator
-	// IntrusionSet is a grouped set of advesarial behaviors and resources with common behavior
-	_IntrusionSet
-	// Malware is a type of TTP also known as malcious code or software
-	_Malware
-	// ObservedData conveys information observed on networks or systems using the Cyber Observable specification
-	_ObservedData
-	// Report are collections of threat intelligence focused on one or more topics
-	_Report
-	// ThreatActor are actual individuals, groups, organizations, believed to operate with malicious intent
-	_ThreatActor
-	// Tool is a piece of software that can be used by threat actors to conduct attacks
-	_Tool
-	// Vulnerability is a "a mistake in software that can be directly used by a hacker to gain access to a system or network"
-	// http://docs.oasis-open.org/cti/stix/v2.0/cs01/part2-stix-objects/stix-v2.0-cs01-part2-stix-objects.html#omgb5053jgfy
-	_Vulnerability
-)
-
-// RelationshipObject represents a SRO (STIX Relationship Object)
-type RelationshipObject int
-
-const (
-	// Relationship is used to link two SDOs in order to descibre how they're related
-	_Relationship RelationshipObject = 101 + iota
-	// Sighting denotes that something was believed to be seen; they track who and what are being targeted
-	_Sighting
-)
-
-// TransportObject represents a STIX Transport (currently a bundle)
-type TransportObject int
-
-const (
-	// Bundle is a collection of arbitrary STIX objects grouped in a container
-	_Bundle TransportObject = 201 + iota
-)
-
-// DomainObjects is a map of domain object to it's name
-var DomainObjects = map[DomainObject]string{
-	_AttackPattern:  "attack-pattern",
-	_Campaign:       "campaign",
-	_CourseOfAction: "course-of-action",
-	_Identity:       "identity",
-	_Indicator:      "indicator",
-	_IntrusionSet:   "intrusion-set",
-	_Malware:        "malware",
-	_ObservedData:   "observed-data",
-	_Report:         "report",
-	_ThreatActor:    "threat-actor",
-	_Tool:           "tool",
-	_Vulnerability:  "vulnerability",
+// DomainObject defines the interface domain objects need to implement
+type DomainObject interface {
+	STIXObjectType() string
+	Valid() (bool, []error)
 }
 
-// RelationshipObjects is a map of relationship object to it's name
-var RelationshipObjects = map[RelationshipObject]string{
-	_Relationship: "relationship",
-	_Sighting:     "sighting",
-}
+// TODO: move these doc strings to the structs when defined
+// Campaign is a grouping of behaviors describing malicious activites or attacks
+// CourseOfAction is an action taken to prevent or respond to an attack
+// Identity represents individuals, groups, or organizations
+// Indicator contains a pattern that can be used to detect suspicious or malicious activity
+// IntrusionSet is a grouped set of advesarial behaviors and resources with common behavior
+// Malware is a type of TTP also known as malcious code or software
+// ObservedData conveys information observed on networks or systems using the Cyber Observable specification
+// Report are collections of threat intelligence focused on one or more topics
+// ThreatActor are actual individuals, groups, organizations, believed to operate with malicious intent
+// Tool is a piece of software that can be used by threat actors to conduct attacks
+// Vulnerability is a "a mistake in software that can be directly used by a hacker to gain access to a system or network"
+// http://docs.oasis-open.org/cti/stix/v2.0/cs01/part2-stix-objects/stix-v2.0-cs01-part2-stix-objects.html#omgb5053jgfy
 
-// TransportObjects is a map of transport objects to it's name
-var TransportObjects = map[TransportObject]string{
-	_Bundle: "bundle",
-}
+// Relationship is used to link two SDOs in order to descibre how they're related
+// Sighting denotes that something was believed to be seen; they track who and what are being targeted
 
 // list of types
 const (
@@ -101,7 +50,18 @@ const (
 	threatActorType    = "threat-actor"
 	toolType           = "tool"
 	vulnerabilityType  = "vulnerability"
+
+	// object types
+	domainObject       = "domain object"
+	relationshipObject = "relationship object"
+	transportObject    = "transoport object"
 )
+
+type objectValidator func(b []byte) (bool, []error)
+
+var objectValidators = map[string]objectValidator{
+	attackPatternType: validAttackPattern,
+}
 
 // map of types used to validate
 var validStixTypes = map[string]bool{
@@ -120,10 +80,6 @@ var validStixTypes = map[string]bool{
 	threatActorType:    true,
 	toolType:           true,
 	vulnerabilityType:  true}
-
-func validStixType(s string) bool {
-	return validStixTypes[s]
-}
 
 // ExternalReference data type for pointing to references that are external to STIX
 type ExternalReference struct {
@@ -180,7 +136,24 @@ type Validator interface {
 	Valid() (bool, []error)
 }
 
+// Validate will take a raw JSON object and run validation against it.
+func Validate(b []byte) (bool, []error) {
+	t := objectType(b)
+	if validStixType(t) {
+		return objectValidators[t](b)
+	}
+	return false, []error{fmt.Errorf("Invalid STIX type '%v' for object", t)}
+}
+
 /* helpers */
+
+func errorsToString(errs []error) error {
+	s := []string{}
+	for _, err := range errs {
+		s = append(s, fmt.Sprintf("%v", err))
+	}
+	return fmt.Errorf(strings.Join(s, "; "))
+}
 
 func invalidType() error {
 	return fmt.Errorf(`STIX Type is invalid`)
@@ -190,6 +163,17 @@ func invalidSpecVersion() error {
 	return fmt.Errorf(`SpecVersion should be` + specVersion)
 }
 
-func validationErrors(errs []error) error {
-	return fmt.Errorf(fmt.Sprintf("Errors: %v", errs))
+// peek into a JSON object and return its type
+func objectType(o []byte) string {
+	re := regexp.MustCompile(`"type":\s"(.+?)"`)
+	matches := re.FindStringSubmatch(string(o))
+
+	if len(matches) > 1 {
+		return matches[1]
+	}
+	return ""
+}
+
+func validStixType(s string) bool {
+	return validStixTypes[s]
 }

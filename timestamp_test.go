@@ -1,6 +1,9 @@
 package stones
 
-import "testing"
+import (
+	"encoding/json"
+	"testing"
+)
 
 func TestNewTimestamp(t *testing.T) {
 	tests := []struct {
@@ -16,6 +19,20 @@ func TestNewTimestamp(t *testing.T) {
 		if test.hasError && err == nil {
 			t.Error("Expected an error", "Test:", ts)
 		}
+	}
+}
+
+func TestTimestampMarshal(t *testing.T) {
+	ts, err := NewTimestamp("2016-04-06T20:07:09.000Z")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	b, err := json.Marshal(ts)
+	expected := `"2016-04-06T20:07:09Z"`
+
+	if string(b) != expected {
+		t.Error("Got:", string(b), "Expected:", expected)
 	}
 }
 

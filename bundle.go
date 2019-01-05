@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// Bundle represents a STIX Bundle: a collection of STIX objects.
+// Bundle is a collection of arbitrary STIX objects grouped in a container
 type Bundle struct {
 	// required
 	Type        string            `json:"type" stones:"required"`
@@ -34,30 +34,6 @@ func (b *Bundle) AddObject(o string) {
 	bundle := *b
 	bundle.Objects = append(bundle.Objects, json.RawMessage(o))
 	*b = bundle
-}
-
-// UnmarshalJSON implements the encoding/json Unmarshaler interface (https://golang.org/pkg/encoding/json/#Unmarshaler).
-//
-// It will take JSON and deserialize to a Bundle.  This should not be called directly, but instead
-// json.Unmarshal(b []byte, v interface{}) should be used.
-//
-// Validation is run on the Bundle; if invalid, errors are returned as one error, but with errors messages
-// separated by semi-colons.
-func (b *Bundle) UnmarshalJSON(d []byte) error {
-	// use an aliase to avoid infinite loop by using Unmarshal on the object
-	type BundleAlias Bundle
-	alias := struct{ *BundleAlias }{
-		BundleAlias: (*BundleAlias)(b),
-	}
-
-	if err := json.Unmarshal(d, &alias); err != nil {
-		return err
-	}
-
-	if valid, errs := b.Valid(); !valid {
-		return validationErrors(errs)
-	}
-	return nil
 }
 
 // Valid is called to check for STiX 2.0 specification conformance.
