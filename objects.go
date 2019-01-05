@@ -18,7 +18,15 @@ type Object struct {
 	ExternalReferences []ExternalReference `json:"external_references,omitempty" stones:"optional"`
 	ObjectMarkingRefs  []Identifier        `json:"object_marking_refs,omitempty" stones:"optional"`
 	GranularMarkings   []string            `json:"granular_markings,omitempty" stones:"optional"`
-	Source             []byte              `stones:"required"`
+	Source             []byte              `stones:"optional"`
+}
+
+// ObjectFromBytes takes a raw object in bytes and converts to an Object
+func ObjectFromBytes(b []byte) (Object, error) {
+	var o Object
+	err := json.Unmarshal(b, &o)
+	o.Source = b
+	return o, err
 }
 
 // NewObject takes a STIX Type as a string and returns an Object with that Type and a new ID.
@@ -32,23 +40,17 @@ func NewObject(t string) (o Object, err error) {
 //
 // It will take JSON and deserialize to an Object.  This should not be called directly, but instead
 // json.Unmarshal(b []byte, v interface{}) should be used.
-//
-// Validation is run on the Object; if invalid, validation errors are returned as one error.
-func (o *Object) UnmarshalJSON(d []byte) error {
+func (o *Object) UnmarshalJSON(b []byte) error {
 	// use an aliase to avoid infinite loop by using Unmarshal on the object
 	type ObjectAlias Object
 	alias := struct{ *ObjectAlias }{
 		ObjectAlias: (*ObjectAlias)(o),
 	}
 
-	if err := json.Unmarshal(d, &alias); err != nil {
+	if err := json.Unmarshal(b, &alias); err != nil {
 		return err
 	}
-	o.Source = d
-
-	if valid, errs := o.Valid(); !valid {
-		return validationErrors(errs)
-	}
+	o.Source = b
 
 	return nil
 }
@@ -77,10 +79,6 @@ func (o *Object) Valid() (valid bool, errs []error) {
 
 	if o.Modified == notSet {
 		errs = append(errs, fmt.Errorf("Modified time must be set; should be > 1970-01-01 00:00:00Z"))
-	}
-
-	if len(o.Source) == 0 {
-		errs = append(errs, fmt.Errorf("Object 'Source' cannot be empty"))
 	}
 
 	if len(errs) == 0 {

@@ -13,18 +13,30 @@ func TestNewObject(t *testing.T) {
 	}
 }
 
-func TestObjectSerializeDeserialize(t *testing.T) {
-	in, err := ioutil.ReadFile("testdata/malware.json")
-
-	var o Object
-	err = json.Unmarshal(in, &o)
-	if err != nil {
-		t.Fatal(err)
+func TestObjectUnmarshal(t *testing.T) {
+	tests := []struct {
+		file        string
+		expectError bool
+	}{
+		{"testdata/malware.json", false},
+		{"testdata/malware_invalid_object.json", true},
 	}
 
-	_, err = json.Marshal(o)
-	if err != nil {
-		t.Fatal(err)
+	for _, test := range tests {
+		in, err := ioutil.ReadFile(test.file)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var o Object
+		err = json.Unmarshal(in, &o)
+
+		if err != nil && !test.expectError {
+			t.Error("Expected no error:", err)
+		}
+		if err == nil && test.expectError {
+			t.Error("Expected error from file:", test.file)
+		}
 	}
 }
 
@@ -46,13 +58,11 @@ func TestObjectValid(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		// ignore the error from Unmarshal (which will include any Validation errors
-		var o Object
-		if err := json.Unmarshal(b, &o); err == nil && test.expectError {
-			t.Error("Expected an error for object:", string(b))
+		o, err := ObjectFromBytes(b)
+		if err != nil {
+			t.Fatal(err)
 		}
 
-		// test Valid itself
 		_, errs := o.Valid()
 		if test.expectError && len(errs) == 0 {
 			t.Error("Expected error, Test:", test, "Object:", o)

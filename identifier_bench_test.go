@@ -13,6 +13,12 @@ func BenchIdentifierValid(b *testing.B) {
 	}
 }
 
+func BenchmarkIdentifierFromString(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		IdentifierFromString("bundle--6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+	}
+}
+
 func BenchmarkNewIdentifier(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		NewIdentifier("malware")
@@ -23,6 +29,17 @@ func BenchNewIdentifierAndValid(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		id, _ := NewIdentifier("bundle")
 		id.Valid()
+	}
+}
+
+func BenchmarkMarshalIdentifier(b *testing.B) {
+	id, err := NewIdentifier("bundle")
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		json.Marshal(id)
 	}
 }
 

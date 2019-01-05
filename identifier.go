@@ -60,9 +60,6 @@ func (id *Identifier) String() string {
 //
 // It will take JSON and deserialize to an Object.  This should not be called directly, but instead
 // json.Unmarshal(b []byte, v interface{}) should be used.
-//
-// Validation is run on the Object; if invalid, errors are returned as one error, but with errors messages
-// separated by semi-colons.
 func (id *Identifier) UnmarshalJSON(b []byte) error {
 	var s string
 	if err := json.Unmarshal(b, &s); err != nil {
@@ -71,11 +68,6 @@ func (id *Identifier) UnmarshalJSON(b []byte) error {
 
 	newID, err := IdentifierFromString(s)
 	id.Type, id.ID = newID.Type, newID.ID
-
-	if valid, errs := id.Valid(); !valid {
-		errs = pushError(err, errs)
-		return validationErrors(errs)
-	}
 
 	return err
 }
@@ -109,13 +101,4 @@ func (id *Identifier) validID() bool {
 		return false
 	}
 	return true
-}
-
-/* helpers */
-
-func pushError(e error, es []error) []error {
-	if e != nil {
-		return append([]error{e}, es...)
-	}
-	return es
 }

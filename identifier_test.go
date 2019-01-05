@@ -1,10 +1,29 @@
 package stones
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/gofrs/uuid"
 )
+
+func TestIdentifierMarshal(t *testing.T) {
+	id, err := IdentifierFromString("bundle--5d0092c5-5f74-4287-9642-33f4c354e56d")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	i, err := json.Marshal(&id)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := `"bundle--5d0092c5-5f74-4287-9642-33f4c354e56d"`
+
+	if string(i) != expected {
+		t.Error("Got:", string(i), "Expected:", expected)
+	}
+}
 
 func TestIdentifierUnmarshalJSON(t *testing.T) {
 	testUUID, _ := uuid.FromString("6ba7b810-9dad-11d1-80b4-00c04fd430c8")

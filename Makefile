@@ -43,3 +43,11 @@ test:
 
 test_failures:
 	go test -v ./... 2>&1 | grep -A 1 FAIL
+
+test-run:
+ifdef test
+	go test -i ./...
+	go test -v -failfast ./... -run $(test)
+else
+	@echo Syntax is 'make $@ test=<test name>'
+endif
