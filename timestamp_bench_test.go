@@ -9,7 +9,7 @@ import (
 var now = time.Now().UTC()
 
 func BenchmarkMarshalTimestamp(b *testing.B) {
-	ts, err := NewTimestamp("2016-04-06T20:07:09.000Z")
+	ts, err := TimestampFromString("2016-04-06T20:07:09.000Z")
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -19,8 +19,8 @@ func BenchmarkMarshalTimestamp(b *testing.B) {
 	}
 }
 
-func BenchmarkNewTimestamp(b *testing.B) {
+func BenchmarkTimestampFromString(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		NewTimestamp(now.Format(time.RFC3339Nano))
+		TimestampFromString(now.Format(time.RFC3339Nano))
 	}
 }

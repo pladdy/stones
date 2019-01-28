@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestNewTimestamp(t *testing.T) {
+func TestTimestampFromString(t *testing.T) {
 	tests := []struct {
 		timestamp string
 		hasError  bool
@@ -15,7 +15,7 @@ func TestNewTimestamp(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		ts, err := NewTimestamp(test.timestamp)
+		ts, err := TimestampFromString(test.timestamp)
 		if test.hasError && err == nil {
 			t.Error("Expected an error", "Test:", ts)
 		}
@@ -23,7 +23,7 @@ func TestNewTimestamp(t *testing.T) {
 }
 
 func TestTimestampMarshal(t *testing.T) {
-	ts, err := NewTimestamp("2016-04-06T20:07:09.000Z")
+	ts, err := TimestampFromString("2016-04-06T20:07:09.000Z")
 	if err != nil {
 		t.Fatal(err)
 	}
