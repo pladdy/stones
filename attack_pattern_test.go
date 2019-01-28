@@ -6,19 +6,6 @@ import (
 	"testing"
 )
 
-func TestAttackPatternSTIXObjectType(t *testing.T) {
-	o := validTestObject(attackPatternType)
-	ap := AttackPattern{Object: o}
-	ap.Name = "test"
-
-	result := ap.STIXObjectType()
-	expected := domainObject
-
-	if result != domainObject {
-		t.Error("Got:", result, "Expected:", expected)
-	}
-}
-
 func TestAttackPatternValidNoKillChain(t *testing.T) {
 	tests := []struct {
 		name  string

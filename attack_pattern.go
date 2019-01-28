@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-// AttackPatternFields defines the fields only used by this SDO
-type AttackPatternFields struct {
+// AttackPatternProperites defines the fields only used by this SDO
+type AttackPatternProperites struct {
 	Name            string           `json:"name" stones:"required"`
 	Description     string           `json:"description,omitempty" stones:"optional"`
 	KillChainPhases []KillChainPhase `json:"kill_chain_phases,omitempty" stones:"optional"`
@@ -15,7 +15,7 @@ type AttackPatternFields struct {
 // AttackPattern is a TTP (Tactic, technique, or procedure) that describes how advesaries attempt to compromise targets.
 type AttackPattern struct {
 	Object
-	AttackPatternFields
+	AttackPatternProperites
 }
 
 // NewAttackPattern returns an AttackPattern object
@@ -23,12 +23,9 @@ func NewAttackPattern(name string) (ap AttackPattern, err error) {
 	ap.ID, err = NewIdentifier(attackPatternType)
 	ap.Name = name
 	ap.Type = attackPatternType
+	ap.Created = NewTimestamp()
+	ap.Modified = NewTimestamp()
 	return
-}
-
-// STIXObjectType returns the group of STIX objects it belongs to (domain, relationship, transport)
-func (ap *AttackPattern) STIXObjectType() string {
-	return domainObject
 }
 
 // UnmarshalJSON implements the encoding/json Unmarshaler interface (https://golang.org/pkg/encoding/json/#Unmarshaler).
@@ -39,7 +36,7 @@ func (ap *AttackPattern) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &ap.Object); err != nil {
 		return err
 	}
-	if err := json.Unmarshal(b, &ap.AttackPatternFields); err != nil {
+	if err := json.Unmarshal(b, &ap.AttackPatternProperites); err != nil {
 		return err
 	}
 
