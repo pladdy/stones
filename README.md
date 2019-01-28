@@ -6,7 +6,7 @@
 [![Release](https://img.shields.io/github/release/golang-standards/project-layout.svg?style=flat-square)](https://github.com/pladdy/stones/releases/latest)
 
 ## stones
-A STIX 2.0 Validator written in Go
+A STIX 2.0 Validator and Creator written in Go
 
 This is being written to separate STIX validation/processing from TAXII (github.com/pladdy/cabby).
 
@@ -18,31 +18,8 @@ This is being written to separate STIX validation/processing from TAXII (github.
 - [ ] Validate objects based on their type
 - [ ] Return a generic object that has the attributes of its type?
 
-## How to Use
-```go
-import (
-  "fmt"
-
-  "github.com/pladdy/stones"
-)
-
-rawJson := []byte(`{
-              "type": "malware",
-              "id": "malware--31b940d4-6f7f-459a-80ea-9c1f17b5891b",
-              "created": "2016-04-06T20:07:09.000Z",
-              "modified": "2016-04-06T20:07:09.000Z",
-              "created_by_ref": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
-              "name": "Poison Ivy"
-            }`)
-
-var o stones.Object
-err := stones.UnmarshalJSON(rawJson, o)
-if err != nil {
-  fmt.Println("something went wrong, is it a valid object")
-}
-
-fmt.Println(o)
-```
+## Examples
+- https://github.com/pladdy/stones/examples/unmarshal_bundle.go
 
 ## Resources
 - OASIS Doc: https://oasis-open.github.io/cti-documentation/resources
