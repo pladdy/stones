@@ -8,14 +8,6 @@ import (
 	"strings"
 )
 
-const specVersion = "2.0"
-
-// DomainObject defines the interface domain objects need to implement
-type DomainObject interface {
-	STIXObjectType() string
-	Valid() (bool, []error)
-}
-
 // TODO: move these doc strings to the structs when defined
 // Campaign is a grouping of behaviors describing malicious activites or attacks
 // CourseOfAction is an action taken to prevent or respond to an attack
@@ -35,6 +27,7 @@ type DomainObject interface {
 
 // list of types
 const (
+	// SDO, SRO, and STO types
 	attackPatternType  = "attack-pattern"
 	bundleType         = "bundle"
 	campaignType       = "campaign"
@@ -55,33 +48,18 @@ const (
 	domainObject       = "domain object"
 	relationshipObject = "relationship object"
 	transportObject    = "transoport object"
+
+	// version
+	specVersion = "2.0"
 )
 
-type objectValidator func(b []byte) (bool, []error)
-
-var objectValidators = map[string]objectValidator{
-	attackPatternType: validAttackPattern,
+// Validatable defines the interface objects need to satisfy to be able to validate them selves
+type Validatable interface {
+	Valid() (bool, []error)
 }
 
-// map of types used to validate
-var validStixTypes = map[string]bool{
-	attackPatternType:  true,
-	bundleType:         true,
-	campaignType:       true,
-	courseOfActionType: true,
-	identityType:       true,
-	indicatorType:      true,
-	intrusionSetType:   true,
-	malwareType:        true,
-	observedDataType:   true,
-	relationshipType:   true,
-	reportType:         true,
-	sightingType:       true,
-	threatActorType:    true,
-	toolType:           true,
-	vulnerabilityType:  true}
-
 // ErrorsToString converts a slice of errors to one error
+// TODO: this is gross, how about a ValidationErrors type with a method to pretty print errors?
 func ErrorsToString(errs []error) error {
 	s := []string{}
 	for _, err := range errs {
@@ -118,6 +96,14 @@ type Hashes map[string]string
 // 	return true, []error{}
 // }
 
+func invalidSpecVersion() error {
+	return fmt.Errorf(`SpecVersion should be` + specVersion)
+}
+
+func invalidType() error {
+	return fmt.Errorf(`STIX Type is invalid`)
+}
+
 // KillChainPhase represents a phase in a kill chain
 type KillChainPhase struct {
 	KillChainName string `json:"kill_chain_name"`
@@ -140,30 +126,6 @@ func (k *KillChainPhase) Valid() (valid bool, errs []error) {
 	return
 }
 
-// Validator specfies what methods each object should implement for validation
-type Validator interface {
-	Valid() (bool, []error)
-}
-
-// Validate will take a raw JSON object and run validation against it.
-func Validate(b []byte) (bool, []error) {
-	t := objectType(b)
-	if validStixType(t) {
-		return objectValidators[t](b)
-	}
-	return false, []error{fmt.Errorf("Invalid STIX type '%v' for object", t)}
-}
-
-/* helpers */
-
-func invalidType() error {
-	return fmt.Errorf(`STIX Type is invalid`)
-}
-
-func invalidSpecVersion() error {
-	return fmt.Errorf(`SpecVersion should be` + specVersion)
-}
-
 // peek into a JSON object and return its type
 func objectType(o []byte) string {
 	re := regexp.MustCompile(`"type":\s"(.+?)"`)
@@ -175,6 +137,44 @@ func objectType(o []byte) string {
 	return ""
 }
 
+type objectValidator func(b []byte) (bool, []error)
+
+var objectValidators = map[string]objectValidator{
+	attackPatternType: validAttackPattern,
+}
+
+// Validator specfies what methods each object should implement for validation
+type Validator interface {
+	Valid() (bool, []error)
+}
+
+// Validate will take a raw JSON object and run validation against it.
+func Validate(b []byte) (bool, []error) {
+	t := objectType(b)
+	if validStixType(t) && objectValidators[t] != nil {
+		return objectValidators[t](b)
+	}
+	return false, []error{fmt.Errorf("Invalid STIX type '%v' for object", t)}
+}
+
 func validStixType(s string) bool {
 	return validStixTypes[s]
 }
+
+// map of types used to validate
+var validStixTypes = map[string]bool{
+	attackPatternType:  true,
+	bundleType:         true,
+	campaignType:       true,
+	courseOfActionType: true,
+	identityType:       true,
+	indicatorType:      true,
+	intrusionSetType:   true,
+	malwareType:        true,
+	observedDataType:   true,
+	relationshipType:   true,
+	reportType:         true,
+	sightingType:       true,
+	threatActorType:    true,
+	toolType:           true,
+	vulnerabilityType:  true}

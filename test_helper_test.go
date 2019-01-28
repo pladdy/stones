@@ -1,10 +1,8 @@
 package stones
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
-	"time"
 )
 
 func attackPatternJSON() []byte {
@@ -24,11 +22,7 @@ func malwareJSON() []byte {
 }
 
 func validTestObject(objectType string) Object {
-	now, err := NewTimestamp(time.Now().Format(time.RFC3339Nano))
-	if err != nil {
-		fmt.Println("Failed to create now as a Timestamp", err)
-	}
-
+	now := NewTimestamp()
 	theType := objectType
 	id, _ := IdentifierFromString(objectType + "--5d0092c5-5f74-4287-9642-33f4c354e56d")
 

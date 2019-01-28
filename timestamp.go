@@ -9,7 +9,12 @@ type Timestamp struct {
 }
 
 // NewTimestamp returns a new Timestamp based on a timestamp string
-func NewTimestamp(s string) (Timestamp, error) {
+func NewTimestamp() Timestamp {
+	return Timestamp{time.Now()}
+}
+
+// TimestampFromString returns a new Timestamp based on a timestamp string
+func TimestampFromString(s string) (Timestamp, error) {
 	t, err := time.Parse(time.RFC3339Nano, s)
 	return Timestamp{t}, err
 }

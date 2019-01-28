@@ -33,6 +33,8 @@ func ObjectFromBytes(b []byte) (Object, error) {
 func NewObject(t string) (o Object, err error) {
 	o.ID, err = NewIdentifier(t)
 	o.Type = t
+	o.Created = NewTimestamp()
+	o.Modified = NewTimestamp()
 	return
 }
 
