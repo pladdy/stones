@@ -3,10 +3,10 @@
 all: dependencies test
 
 bench:
-	go test -bench .
+	gotest -bench .
 
 cover:
-	go test -v -coverprofile=cover.out
+	gotest -v -coverprofile=cover.out
 	go tool cover -func=cover.out
 	@echo
 	@echo "'make cover html=true' to see coverage details in a browser"
@@ -16,7 +16,7 @@ endif
 	@rm cover.out
 
 coverage.txt:
-	go test -v -coverprofile=$@ -covermode=atomic
+	gotest -v -coverprofile=$@ -covermode=atomic
 
 cover-html:
 	$(MAKE) cover html=true
@@ -26,6 +26,7 @@ dependencies:
 	go get github.com/fzipp/gocyclo
 	go get golang.org/x/lint/golint
 	go get github.com/securego/gosec/cmd/gosec/...
+	go get -u github.com/rakyll/gotest
 
 fmt:
 	go fmt -x
@@ -39,15 +40,15 @@ sec:
 	gosec ./...
 
 test:
-	go test -v -cover ./...
+	gotest -v -cover ./...
 
 test_failures:
-	go test -v ./... 2>&1 | grep -A 1 FAIL
+	gotest -v ./... 2>&1 | grep -A 1 FAIL
 
 test-run:
 ifdef test
-	go test -i ./...
-	go test -v -failfast ./... -run $(test)
+	gotest -i ./...
+	gotest -v -failfast ./... -run $(test)
 else
 	@echo Syntax is 'make $@ test=<test name>'
 endif
