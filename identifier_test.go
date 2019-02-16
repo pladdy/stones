@@ -66,7 +66,7 @@ func TestIdentifierValid(t *testing.T) {
 	// test with unsupported uuid versions
 	ns := uuid.Must(uuid.FromString("123e4567-e89b-12d3-a456-426655440000"))
 	v1UUID := uuid.Must(uuid.NewV1())
-	v2UUID := uuid.Must(uuid.NewV2(0))
+	// v2 is not supported in the uuid library as of ~2019-02; removing from test
 	v3UUID := uuid.NewV3(ns, "test")
 	v4UUID := uuid.Must(uuid.NewV4())
 	v5UUID := uuid.NewV5(ns, "test")
@@ -78,7 +78,6 @@ func TestIdentifierValid(t *testing.T) {
 		{validIdentifier, true},
 		{Identifier{}, false},
 		{Identifier{Type: bundleType, ID: v1UUID}, false},
-		{Identifier{Type: bundleType, ID: v2UUID}, false},
 		{Identifier{Type: bundleType, ID: v3UUID}, false},
 		{Identifier{Type: bundleType, ID: v4UUID}, true},
 		{Identifier{Type: bundleType, ID: v5UUID}, false},
