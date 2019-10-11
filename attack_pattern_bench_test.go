@@ -6,29 +6,24 @@ import (
 	"testing"
 )
 
-var ap AttackPattern
-var valid bool
-var err error
-var errs []error
-
 func BenchmarkAttackPatternValid(b *testing.B) {
 	attackPattern, _ := NewAttackPattern("test")
 
 	for i := 0; i < b.N; i++ {
-		valid, errs = attackPattern.Valid()
+		attackPattern.Valid()
 	}
 }
 
 func BenchmarkNewAttackPattern(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ap, err = NewAttackPattern("test")
+		NewAttackPattern("test")
 	}
 }
 
 func BenchmarkNewAttackPatternAndValid(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ap, err = NewAttackPattern("test")
-		valid, errs = ap.Valid()
+		ap, _ := NewAttackPattern("test")
+		ap.Valid()
 	}
 }
 
@@ -51,6 +46,6 @@ func BenchmarkValidateAttackPattern(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i++ {
-		valid, errs = validAttackPattern(d)
+		validAttackPattern(d)
 	}
 }
